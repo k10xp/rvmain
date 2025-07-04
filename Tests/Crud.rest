@@ -6,3 +6,18 @@ Content-Type: application/json
   "name": "tw",
   "reponame": "tailwindlabs/tailwindcss"
 }
+
+### Create table
+POST http://localhost:8080/create-table
+Content-Type: application/json
+
+### Create user
+POST http://localhost:8080/users/create
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "fullName": "John Doe",
+  "password": "secret"
+}

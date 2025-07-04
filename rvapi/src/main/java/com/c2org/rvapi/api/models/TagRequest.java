@@ -1,12 +1,12 @@
 package com.c2org.rvapi.api.models;
 
-public class TagRequest{
+public class TagRequest {
     private String name;
     private String reponame;
-    private String latest_tag = "";
+    private String latest_tag = null;
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -14,7 +14,7 @@ public class TagRequest{
     }
 
     public String getReponame() {
-        return reponame;
+        return this.reponame;
     }
 
     public void setReponame(String reponame) {
@@ -22,7 +22,7 @@ public class TagRequest{
     }
 
     public String getLatest_tag() {
-        return latest_tag;
+        return this.latest_tag;
     }
 
     public void setLatest_tag(String latest_tag) {

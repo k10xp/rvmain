@@ -17,7 +17,8 @@
 				"vscjava.vscode-spring-initializr",
 				"gxl.git-graph-3",
 				"qwtel.sqlite-viewer",
-				"humao.rest-client"
+				"humao.rest-client",
+				"inferrinizzard.prettier-sql-vscode"
 			],
 			"settings": {
 				"code-runner.enableAppInsights": false
