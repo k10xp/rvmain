@@ -1,0 +1,8 @@
+### Create (example)
+POST http://localhost:8080/example/create
+Content-Type: application/json
+
+{
+  "name": "tw",
+  "reponame": "tailwindlabs/tailwindcss"
+}

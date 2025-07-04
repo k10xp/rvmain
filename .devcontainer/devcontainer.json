@@ -15,7 +15,9 @@
 				"vscjava.vscode-gradle",
 				"vscjava.vscode-java-dependency",
 				"vscjava.vscode-spring-initializr",
-				"gxl.git-graph-3"
+				"gxl.git-graph-3",
+				"qwtel.sqlite-viewer",
+				"humao.rest-client"
 			],
 			"settings": {
 				"code-runner.enableAppInsights": false
