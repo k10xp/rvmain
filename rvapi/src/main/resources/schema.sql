@@ -5,7 +5,7 @@ CREATE TABLE
         full_name VARCHAR(255),
         email VARCHAR(255),
         hashed_password VARCHAR(255),
-        acc_disabled BOOL
+        acc_disabled BOOLEAN
     );
 
 CREATE TABLE

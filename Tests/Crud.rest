@@ -1,15 +1,4 @@
-### Create (example)
-POST http://localhost:8080/example/create
-Content-Type: application/json
-
-{
-  "name": "tw",
-  "reponame": "tailwindlabs/tailwindcss"
-}
-
-### Create table
-POST http://localhost:8080/create-table
-Content-Type: application/json
+@user_id = 
 
 ### Create user
 POST http://localhost:8080/users/create
@@ -19,5 +8,29 @@ Content-Type: application/json
   "username": "johndoe",
   "email": "johndoe@example.com",
   "fullName": "John Doe",
-  "password": "secret"
+  "password": "johndoe"
+}
+
+### Read users
+GET http://localhost:8080/users/read
+Content-Type: application/json
+
+### Read user (single)
+GET http://localhost:8080/users/read/{{user_id}}
+Content-Type: application/json
+
+### Delete user
+DELETE http://localhost:8080/users/delete/{{user_id}}
+Content-Type: application/json
+
+### Update user
+PUT http://localhost:8080/users/update
+Content-Type: application/json
+
+{
+  "id": "{{user_id}}",
+  "username": "notjohndoe",
+  "email": "example@example.com",
+  "fullName": "Not John Doe",
+  "password": "1"
 }

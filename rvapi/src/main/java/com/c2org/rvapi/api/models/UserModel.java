@@ -1,20 +1,17 @@
 package com.c2org.rvapi.api.models;
 
-import java.util.UUID;
-
 public class UserModel {
     private String id;
     private String username;
     private String fullName;
     private String email;
-    private String password;
 
-    public UserModel() {
-        this.id = UUID.randomUUID().toString();
+    public String getId(){
+        return this.id;
     }
 
-    public String getId() {
-        return this.id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -39,13 +36,5 @@ public class UserModel {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setPassword(String pw) {
-        this.password = pw;
     }
 }
