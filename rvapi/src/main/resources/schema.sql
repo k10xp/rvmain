@@ -5,6 +5,7 @@ CREATE TABLE
         full_name VARCHAR(255),
         email VARCHAR(255),
         hashed_password VARCHAR(255),
+        auth_token TEXT,
         acc_disabled BOOLEAN
     );
 

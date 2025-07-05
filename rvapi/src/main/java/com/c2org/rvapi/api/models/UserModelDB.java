@@ -2,6 +2,7 @@ package com.c2org.rvapi.api.models;
 
 public class UserModelDB extends UserModel {
     private String hashedPassword;
+    private String authToken;
     private Boolean accDisabled;
 
     public UserModelDB() {
@@ -14,6 +15,14 @@ public class UserModelDB extends UserModel {
 
     public void setHashedPassword(String input) {
         this.hashedPassword = input;
+    }
+
+    public String getAuthToken(){
+        return this.authToken;
+    }
+
+    public void setAuthToken(String input){
+        this.authToken = input;
     }
 
     public Boolean getAccDisabled() {
