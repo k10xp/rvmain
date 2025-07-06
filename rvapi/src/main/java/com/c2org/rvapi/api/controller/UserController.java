@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.c2org.rvapi.api.models.UserModel;
 import com.c2org.rvapi.api.models.UserModelPW;
 import com.c2org.rvapi.api.service.UserCrud;
+import com.c2org.rvapi.logic.JwtToken;
 
 @RestController
 @RequestMapping("/users")
@@ -26,6 +26,7 @@ public class UserController {
     @Autowired
     private UserCrud userCrud;
 
+    // create user, need: username, email, fullname, password
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> createUser(@RequestBody UserModelPW user) {
         try {
@@ -63,26 +64,53 @@ public class UserController {
         }
     }
 
-    @GetMapping("/read")
-    public ResponseEntity<List<UserModel>> readUsers() {
+    // get token, need: username, email, password
+    @PostMapping("/token")
+    public ResponseEntity<Map<String, Object>> getToken(@RequestBody UserModelPW user) {
         try {
-            List<UserModel> users = userCrud.readAll();
-            if (users != null) {
-                return new ResponseEntity<>(users, HttpStatus.OK);
+            String token = JwtToken.generateToken(user.getId(), user.getEmail());
+            int rows = userCrud.createToken(user, true);
+
+            if (rows > 0) {
+                Map<String, Object> responseBody = new HashMap<>();
+
+                responseBody.put("status", "success");
+                responseBody.put("statusCode", HttpStatus.OK.value());
+                responseBody.put("token", token);
+                responseBody.put("username", user.getUsername());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                // no rows affected, treat as error
+                Map<String, Object> errorResponse = new HashMap<>();
+
+                errorResponse.put("status", "not_modified");
+                errorResponse.put("statusCode", HttpStatus.NOT_MODIFIED.value());
+                errorResponse.put("message", "No user was created or updated.");
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_MODIFIED);
             }
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+
+            errorResponse.put("status", "bad_request");
+            errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
+            errorResponse.put("message", e.getMessage());
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
 
             errorResponse.put("status", "internal_server_error");
             errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
             errorResponse.put("message", "Error: " + e.getMessage());
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 
-    @GetMapping("/read/{id}")
+    // show current user info, need: token, id
+    @GetMapping("/info/{id}")
     public ResponseEntity<?> readUser(@PathVariable String id) {
         try {
             UserModel user = userCrud.readSingle(id);
@@ -107,35 +135,44 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable String id) {
+    // set user status helper function
+    private ResponseEntity<Map<String, Object>> toggleUserStatus(String id, boolean active) {
         try {
-            int rows = userCrud.delete(id);
+            int rows = userCrud.toggleAcc(id, active);
             Map<String, Object> responseBody = new HashMap<>();
             if (rows > 0) {
                 responseBody.put("status", "success");
                 responseBody.put("statusCode", HttpStatus.OK.value());
-                responseBody.put("message", "User deleted successfully");
-
+                responseBody.put("message", "Account " + (active ? "active" : "inactive"));
                 return new ResponseEntity<>(responseBody, HttpStatus.OK);
             } else {
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.NOT_FOUND.value());
                 responseBody.put("message", "User not found with id: " + id);
-
                 return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-
             errorResponse.put("status", "internal_server_error");
             errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
             errorResponse.put("message", "Error: " + e.getMessage());
-
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    // set user active
+    @PutMapping("/status/{id}/active")
+    public ResponseEntity<Map<String, Object>> toggleActive(@PathVariable String id) {
+        return toggleUserStatus(id, true);
+    }
+
+    // set user inactive
+    @PutMapping("/status/{id}/inactive")
+    public ResponseEntity<Map<String, Object>> toggleInactive(@PathVariable String id) {
+        return toggleUserStatus(id, false);
+    }
+
+    // update single user, need: id, username, email, fullName, password
     @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UserModelPW user) {
         try {
@@ -171,5 +208,25 @@ public class UserController {
 
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // todo: limit to admin only
+    @GetMapping("/read")
+    public ResponseEntity<List<UserModel>> readUsers() {
+        try {
+            List<UserModel> users = userCrud.readAll();
+            if (users != null) {
+                return new ResponseEntity<>(users, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+
+            errorResponse.put("status", "internal_server_error");
+            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.put("message", "Error: " + e.getMessage());
+        }
+        return null;
     }
 }

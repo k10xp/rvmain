@@ -1,4 +1,5 @@
 @user_id = 
+@password = 
 
 ### Create user
 POST http://localhost:8080/users/create
@@ -7,20 +8,30 @@ Content-Type: application/json
 {
   "username": "johndoe",
   "email": "johndoe@example.com",
-  "fullName": "John Doe",
+  "fullname": "John Doe",
   "password": "johndoe"
 }
 
-### Read users
-GET http://localhost:8080/users/read
+### Get token (new each time)
+POST http://localhost:8080/users/token
 Content-Type: application/json
 
-### Read user (single)
-GET http://localhost:8080/users/read/{{user_id}}
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "password": "johndoe"
+}
+
+### Current user info
+GET http://localhost:8080/users/info/{{user_id}}
 Content-Type: application/json
 
-### Delete user
-DELETE http://localhost:8080/users/delete/{{user_id}}
+### Toggle active
+PUT http://localhost:8080/users/status/{{user_id}}/active
+Content-Type: application/json
+
+### Toggle inactive
+PUT http://localhost:8080/users/status/{{user_id}}/inactive
 Content-Type: application/json
 
 ### Update user
@@ -31,6 +42,16 @@ Content-Type: application/json
   "id": "{{user_id}}",
   "username": "notjohndoe",
   "email": "example@example.com",
-  "fullName": "Not John Doe",
-  "password": "1"
+  "fullname": "Not John Doe",
+  "password": "{{password}}"
 }
+
+---
+
+### Read users
+GET http://localhost:8080/users/read
+Content-Type: application/json
+
+### Delete user (removed)
+DELETE http://localhost:8080/users/delete/{{user_id}}
+Content-Type: application/json

@@ -2,11 +2,11 @@ CREATE TABLE
     IF NOT EXISTS usermap (
         id TEXT PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
-        full_name VARCHAR(255),
+        fullname VARCHAR(255),
         email VARCHAR(255),
         hashed_password VARCHAR(255),
         auth_token TEXT,
-        acc_disabled BOOLEAN
+        acc_active BOOLEAN
     );
 
 CREATE TABLE

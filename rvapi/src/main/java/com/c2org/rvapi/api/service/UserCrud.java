@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.c2org.rvapi.api.models.UserModel;
 import com.c2org.rvapi.api.models.UserModelPW;
+import com.c2org.rvapi.logic.JwtToken;
 import com.c2org.rvapi.logic.PwHash;
 
 @Service
@@ -19,6 +20,7 @@ public class UserCrud {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    // create new user
     public int create(UserModelPW user, boolean update) {
         // validate input
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
@@ -27,7 +29,7 @@ public class UserCrud {
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
-        if (user.getFullName() == null || user.getFullName().isEmpty()) {
+        if (user.getFullname() == null || user.getFullname().isEmpty()) {
             throw new IllegalArgumentException("Full name cannot be null or empty");
         }
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
@@ -36,16 +38,16 @@ public class UserCrud {
 
         // handle create & update
         String query = "INSERT INTO usermap "
-                + "(id, username, full_name, email, hashed_password, acc_disabled) "
+                + "(id, username, fullname, email, hashed_password, acc_active) "
                 + "VALUES (?, ?, ?, ?, ?, ?) ";
 
         if (update == true) {
             query += "ON CONFLICT (id) DO UPDATE SET "
                     + "username = EXCLUDED.username, "
-                    + "full_name = EXCLUDED.full_name, "
+                    + "fullname = EXCLUDED.fullname, "
                     + "email = EXCLUDED.email, "
                     + "hashed_password = EXCLUDED.hashed_password, "
-                    + "acc_disabled = EXCLUDED.acc_disabled";
+                    + "acc_active = EXCLUDED.acc_active";
         }
 
         String newId = update ? user.getId() : UUID.randomUUID().toString();
@@ -54,28 +56,16 @@ public class UserCrud {
             return jdbcTemplate.update(query,
                     newId,
                     user.getUsername(),
-                    user.getFullName(),
+                    user.getFullname(),
                     user.getEmail(),
                     PwHash.hashPassword(user.getPassword()),
-                    false);
+                    true);
         } catch (DuplicateKeyException ex) {
-            throw new RuntimeException("Username already exists", ex);
+            throw new RuntimeException("Error", ex);
         }
     }
 
-    public List<UserModel> readAll() {
-        String query = "SELECT * FROM usermap";
-
-        try {
-            return jdbcTemplate.query(
-                    query,
-                    new BeanPropertyRowMapper<>(UserModel.class));
-        } catch (DataAccessException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
+    // return info for single user
     public UserModel readSingle(String uid) {
         String query = "SELECT * FROM usermap WHERE id = ?";
 
@@ -90,14 +80,16 @@ public class UserCrud {
         }
     }
 
-    public int delete(String uid) {
-        String query = "DELETE FROM usermap WHERE id = ?";
+    // toggle account active/inactive
+    public int toggleAcc(String uid, boolean active) {
+        String query = "UPDATE usermap SET acc_active = ? WHERE id = ?";
 
         try {
-            return jdbcTemplate.update(query, uid);
-        } catch (DataAccessException ex) {
-            ex.printStackTrace();
-            return -1;
+            return jdbcTemplate.update(query,
+                    active ? true : false,
+                    uid);
+        } catch (DuplicateKeyException ex) {
+            throw new RuntimeException("Error", ex);
         }
     }
 
@@ -114,6 +106,50 @@ public class UserCrud {
         } catch (DataAccessException ex) {
             ex.printStackTrace();
             return false;
+        }
+    }
+
+    // create/update token
+    public int createToken(UserModelPW user, boolean update) {
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+
+        String query = "INSERT INTO usermap "
+                + "(username, auth_token) "
+                + "VALUES (?, ?) ";
+
+        if (update) {
+            query += "ON CONFLICT (username) DO UPDATE SET "
+                    + "auth_token = EXCLUDED.auth_token";
+        }
+
+        try {
+            return jdbcTemplate.update(query,
+                    user.getUsername(),
+                    JwtToken.generateToken(user.getId(), user.getEmail()));
+        } catch (DuplicateKeyException ex) {
+            throw new RuntimeException("Username already exists", ex);
+        }
+    }
+
+    // admin only
+    public List<UserModel> readAll() {
+        String query = "SELECT * FROM usermap";
+
+        try {
+            return jdbcTemplate.query(
+                    query,
+                    new BeanPropertyRowMapper<>(UserModel.class));
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 }
