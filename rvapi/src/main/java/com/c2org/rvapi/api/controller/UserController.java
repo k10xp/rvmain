@@ -1,20 +1,20 @@
 package com.c2org.rvapi.api.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.c2org.rvapi.api.models.UserInfo;
 import com.c2org.rvapi.api.models.UserModel;
 import com.c2org.rvapi.api.models.UserModelPW;
 import com.c2org.rvapi.api.service.UserCrud;
@@ -68,8 +68,12 @@ public class UserController {
     @PostMapping("/token")
     public ResponseEntity<Map<String, Object>> getToken(@RequestBody UserModelPW user) {
         try {
-            String token = JwtToken.generateToken(user.getId(), user.getEmail());
-            int rows = userCrud.createToken(user, true);
+            // get user id
+            UserModel dbUser = userCrud.queryByUsername(user.getUsername());
+
+            // generate token + write to db
+            String token = JwtToken.generateToken(dbUser.getId(), user.getEmail());
+            int rows = userCrud.createToken(user, true, token);
 
             if (rows > 0) {
                 Map<String, Object> responseBody = new HashMap<>();
@@ -109,18 +113,21 @@ public class UserController {
         }
     }
 
-    // show current user info, need: token, id
-    @GetMapping("/info/{id}")
-    public ResponseEntity<?> readUser(@PathVariable String id) {
+    // current user info, need: token
+    @GetMapping("/info")
+    public ResponseEntity<?> readUser(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = JwtToken.matchUser(token);
+
         try {
-            UserModel user = userCrud.readSingle(id);
+            UserInfo user = userCrud.readSingle(userId);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
                 Map<String, Object> responseBody = new HashMap<>();
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.NOT_FOUND.value());
-                responseBody.put("message", "User not found with id: " + id);
+                responseBody.put("message", "User not found with id: " + userId);
 
                 return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
             }
@@ -160,19 +167,25 @@ public class UserController {
         }
     }
 
-    // set user active
-    @PutMapping("/status/{id}/active")
-    public ResponseEntity<Map<String, Object>> toggleActive(@PathVariable String id) {
-        return toggleUserStatus(id, true);
+    // set user active, need: token
+    @PutMapping("/status/toggle-active")
+    public ResponseEntity<Map<String, Object>> toggleActive(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = JwtToken.matchUser(token);
+        return toggleUserStatus(userId, true);
     }
 
-    // set user inactive
-    @PutMapping("/status/{id}/inactive")
-    public ResponseEntity<Map<String, Object>> toggleInactive(@PathVariable String id) {
-        return toggleUserStatus(id, false);
+    // set user inactive, need: token
+    @PutMapping("/status/toggle-inactive")
+    public ResponseEntity<Map<String, Object>> toggleInactive(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = JwtToken.matchUser(token);
+        return toggleUserStatus(userId, false);
     }
 
-    // update single user, need: id, username, email, fullName, password
+    // update single user, need: id, username, email, fullname, password
     @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UserModelPW user) {
         try {
@@ -181,13 +194,13 @@ public class UserController {
             if (rows > 0) {
                 responseBody.put("status", "success");
                 responseBody.put("statusCode", HttpStatus.CREATED.value());
-                responseBody.put("message", "User created successfully");
+                responseBody.put("message", "User updated successfully");
 
                 return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
             } else {
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                responseBody.put("message", "Failed to create user");
+                responseBody.put("message", "Failed to update user");
 
                 return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -210,23 +223,53 @@ public class UserController {
         }
     }
 
-    // todo: limit to admin only
-    @GetMapping("/read")
-    public ResponseEntity<List<UserModel>> readUsers() {
+    // update single user, need: token + json to update (username, email, fullname,
+    // password)
+    @PutMapping("/update/v1")
+    public ResponseEntity<?> updateUserV1(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UserModelPW input) {
+        String token = authorizationHeader.replace("Bearer ", "");
+
+        UserModelPW user = new UserModelPW();
+        user.setId(JwtToken.matchUser(token));
+        user.setUsername(input.getUsername());
+        user.setEmail(input.getEmail());
+        user.setFullname(input.getFullname());
+        user.setPassword(input.getPassword());
+
         try {
-            List<UserModel> users = userCrud.readAll();
-            if (users != null) {
-                return new ResponseEntity<>(users, HttpStatus.OK);
+            int rows = userCrud.create(user, true);
+            Map<String, Object> responseBody = new HashMap<>();
+            if (rows > 0) {
+                responseBody.put("status", "success");
+                responseBody.put("statusCode", HttpStatus.CREATED.value());
+                responseBody.put("message", "User updated successfully");
+
+                return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                responseBody.put("status", "error");
+                responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                responseBody.put("message", "Failed to update user");
+
+                return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
             }
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+
+            errorResponse.put("status", "bad_request");
+            errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
+            errorResponse.put("message", e.getMessage());
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
 
             errorResponse.put("status", "internal_server_error");
             errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
             errorResponse.put("message", "Error: " + e.getMessage());
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 }

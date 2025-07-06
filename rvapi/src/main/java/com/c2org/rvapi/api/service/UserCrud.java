@@ -1,6 +1,6 @@
 package com.c2org.rvapi.api.service;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.c2org.rvapi.api.models.UserInfo;
 import com.c2org.rvapi.api.models.UserModel;
 import com.c2org.rvapi.api.models.UserModelPW;
-import com.c2org.rvapi.logic.JwtToken;
 import com.c2org.rvapi.logic.PwHash;
 
 @Service
@@ -38,19 +38,22 @@ public class UserCrud {
 
         // handle create & update
         String query = "INSERT INTO usermap "
-                + "(id, username, fullname, email, hashed_password, acc_active) "
-                + "VALUES (?, ?, ?, ?, ?, ?) ";
+                + "(id, username, fullname, email, hashed_password, acc_active, acc_created, acc_updated) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
 
-        if (update == true) {
+        if (update) {
             query += "ON CONFLICT (id) DO UPDATE SET "
                     + "username = EXCLUDED.username, "
                     + "fullname = EXCLUDED.fullname, "
                     + "email = EXCLUDED.email, "
                     + "hashed_password = EXCLUDED.hashed_password, "
-                    + "acc_active = EXCLUDED.acc_active";
+                    + "acc_active = EXCLUDED.acc_active, "
+                    + "acc_created = usermap.acc_created, "
+                    + "acc_updated = EXCLUDED.acc_updated";
         }
 
         String newId = update ? user.getId() : UUID.randomUUID().toString();
+        String currTime = Instant.now().toString();
 
         try {
             return jdbcTemplate.update(query,
@@ -59,21 +62,30 @@ public class UserCrud {
                     user.getFullname(),
                     user.getEmail(),
                     PwHash.hashPassword(user.getPassword()),
-                    true);
+                    true,
+                    currTime,
+                    currTime);
         } catch (DuplicateKeyException ex) {
             throw new RuntimeException("Error", ex);
         }
     }
 
     // return info for single user
-    public UserModel readSingle(String uid) {
+    public UserInfo readSingle(String uid) {
         String query = "SELECT * FROM usermap WHERE id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(
-                    query,
-                    new BeanPropertyRowMapper<>(UserModel.class),
-                    uid);
+            return jdbcTemplate.queryForObject(query, (rs, rowNum) -> {
+                UserInfo user = new UserInfo();
+                user.setId(rs.getString("id"));
+                user.setUsername(rs.getString("username"));
+                user.setFullname(rs.getString("fullname"));
+                user.setEmail(rs.getString("email"));
+                user.setAccActive(rs.getBoolean("acc_active"));
+                user.setAccCreated(rs.getString("acc_created"));
+                user.setAccUpdated(rs.getString("acc_updated"));
+                return user;
+            }, uid);
         } catch (DataAccessException ex) {
             ex.printStackTrace();
             return null;
@@ -109,8 +121,22 @@ public class UserCrud {
         }
     }
 
+    // query by username
+    public UserModel queryByUsername(String username) {
+        String query = "SELECT * FROM usermap WHERE username = ?";
+        try {
+            return jdbcTemplate.queryForObject(
+                    query,
+                    new BeanPropertyRowMapper<>(UserModel.class),
+                    username);
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
     // create/update token
-    public int createToken(UserModelPW user, boolean update) {
+    public int createToken(UserModelPW user, boolean update,String input_token) {
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
@@ -133,23 +159,9 @@ public class UserCrud {
         try {
             return jdbcTemplate.update(query,
                     user.getUsername(),
-                    JwtToken.generateToken(user.getId(), user.getEmail()));
+                    input_token);
         } catch (DuplicateKeyException ex) {
             throw new RuntimeException("Username already exists", ex);
-        }
-    }
-
-    // admin only
-    public List<UserModel> readAll() {
-        String query = "SELECT * FROM usermap";
-
-        try {
-            return jdbcTemplate.query(
-                    query,
-                    new BeanPropertyRowMapper<>(UserModel.class));
-        } catch (DataAccessException ex) {
-            ex.printStackTrace();
-            return null;
         }
     }
 }
