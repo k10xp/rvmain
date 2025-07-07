@@ -1,0 +1,67 @@
+@token = 
+@password = johndoe
+@user_id = 
+
+---
+
+### Create user
+POST http://localhost:8080/users/create
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "fullname": "John Doe",
+  "password": "{{password}}"
+}
+
+### Get token (new each time)
+POST http://localhost:8080/users/token
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "password": "{{password}}"
+}
+
+### Current user info
+GET http://localhost:8080/users/info
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Toggle inactive
+PUT http://localhost:8080/users/status/toggle-inactive
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Toggle active
+PUT http://localhost:8080/users/status/toggle-active
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Update user v1
+PUT http://localhost:8080/users/update/v1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "notjohndoe1",
+  "email": "example@example.com",
+  "fullname": "Not John Doe",
+  "password": "{{password}}"
+}
+
+---
+
+### Update user
+PUT http://localhost:8080/users/update
+Content-Type: application/json
+
+{
+  "id": "{{user_id}}",
+  "username": "notjohndoe",
+  "email": "example@example.com",
+  "fullname": "Not John Doe",
+  "password": "{{password}}"
+}

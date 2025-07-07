@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>com.c2org</groupId>
 	<artifactId>rvapi</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>rvapi</name>
-	<description>Demo project for Spring Boot</description>
+	<description>rvapi</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -63,6 +63,11 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>4.5.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -91,10 +96,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>com.hubspot.maven.plugins</groupId>
-				<artifactId>prettier-maven-plugin</artifactId>
-			</plugin> -->
 		</plugins>
 	</build>
 
