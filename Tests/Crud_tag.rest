@@ -1,0 +1,37 @@
+@token = 
+@tagId = 
+
+### Create tag
+POST http://localhost:8080/tags/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tagname": "neovim",
+  "reponame": "neovim/neovim"
+}
+
+### Toggle tag hide
+PUT http://localhost:8080/tags/{{tagId}}/toggle-hide
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Toggle tag show
+PUT http://localhost:8080/tags/{{tagId}}/toggle-show
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Show all user tags
+GET http://localhost:8080/tags/all
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Update single tag
+PUT http://localhost:8080/tags/update/{{tagId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tagname": "arch",
+  "reponame": "arch/btw"
+}

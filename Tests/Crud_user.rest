@@ -30,14 +30,13 @@ GET http://localhost:8080/users/info
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-
-### Toggle active
-PUT http://localhost:8080/users/status/toggle-active
+### Toggle inactive
+PUT http://localhost:8080/users/status/toggle-inactive
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-### Toggle inactive
-PUT http://localhost:8080/users/status/toggle-inactive
+### Toggle active
+PUT http://localhost:8080/users/status/toggle-active
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -54,10 +53,6 @@ Authorization: Bearer {{token}}
 }
 
 ---
-
-### Read users
-GET http://localhost:8080/admin/read
-Content-Type: application/json
 
 ### Update user
 PUT http://localhost:8080/users/update

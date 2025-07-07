@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.c2org.rvapi.api.models.DBEntry;
+import com.c2org.rvapi.api.models.TagInfo;
 import com.c2org.rvapi.api.service.AdminCrud;
 
 @RestController
@@ -21,10 +22,30 @@ public class AdminController {
     private AdminCrud adminCrud;
 
     // read all users
-    @GetMapping("/read")
+    @GetMapping("/users/read")
     public ResponseEntity<List<DBEntry>> readUsers() {
         try {
-            List<DBEntry> users = adminCrud.readAll();
+            List<DBEntry> users = adminCrud.readAll_users();
+            if (users != null) {
+                return new ResponseEntity<>(users, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+
+            errorResponse.put("status", "internal_server_error");
+            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.put("message", "Error: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // read all tags
+    @GetMapping("/tags/read")
+    public ResponseEntity<List<TagInfo>> readTags() {
+        try {
+            List<TagInfo> users = adminCrud.readAll_tags();
             if (users != null) {
                 return new ResponseEntity<>(users, HttpStatus.OK);
             } else {
