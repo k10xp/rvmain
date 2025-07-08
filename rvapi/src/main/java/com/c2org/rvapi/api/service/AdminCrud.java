@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.c2org.rvapi.api.models.DBEntry;
+import com.c2org.rvapi.api.models.LogEntry;
 import com.c2org.rvapi.api.models.TagInfo;
 
 @Service
@@ -15,12 +16,12 @@ public class AdminCrud extends UserCrud {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private String query = "SELECT * FROM ";
+
     // show all users
     public List<DBEntry> readAll_users() {
-        String query = "SELECT * FROM usermap";
-
         try {
-            return jdbcTemplate.query(query, (rs, rowNum) -> {
+            return jdbcTemplate.query(query + "usermap", (rs, rowNum) -> {
                 DBEntry user = new DBEntry();
                 user.setId(rs.getString("id"));
                 user.setUsername(rs.getString("username"));
@@ -41,10 +42,8 @@ public class AdminCrud extends UserCrud {
 
     // show all users
     public List<TagInfo> readAll_tags() {
-        String query = "SELECT * FROM repotags";
-
         try {
-            return jdbcTemplate.query(query, (rs, rowNum) -> {
+            return jdbcTemplate.query(query + "repotags", (rs, rowNum) -> {
                 TagInfo tag = new TagInfo();
                 tag.setTagId(rs.getString("tag_id"));
                 tag.setUserId(rs.getString("user_id"));
@@ -55,6 +54,23 @@ public class AdminCrud extends UserCrud {
                 tag.setUpdated(rs.getString("tag_updated"));
                 tag.setIsShow(rs.getBoolean("is_show"));
                 return tag;
+            });
+        } catch (DataAccessException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    // show all logs
+    public List<LogEntry> readAll_logs() {
+        try {
+            return jdbcTemplate.query(query + "errorlogs", (rs, rowNum) -> {
+                LogEntry logs = new LogEntry();
+                logs.setLogId(rs.getString("log_id"));
+                logs.setUserId(rs.getString("user_id"));
+                logs.setLogCreated(rs.getString("log_created"));
+                logs.setLogContent(rs.getString("log_content"));
+                return logs;
             });
         } catch (DataAccessException ex) {
             ex.printStackTrace();

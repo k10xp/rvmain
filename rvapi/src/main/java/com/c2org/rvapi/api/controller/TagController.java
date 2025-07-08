@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.c2org.rvapi.api.models.TagInfo;
 import com.c2org.rvapi.api.models.TagModel;
+import com.c2org.rvapi.api.service.CreateLog;
 import com.c2org.rvapi.api.service.TagCrud;
 import com.c2org.rvapi.logic.JwtToken;
 
@@ -26,6 +27,23 @@ import com.c2org.rvapi.logic.JwtToken;
 public class TagController {
     @Autowired
     private TagCrud tagCrud;
+
+    @Autowired
+    private CreateLog createLog;
+
+    // reduce dupe exception code
+    private ResponseEntity<Map<String, Object>> exceptionWrapper(String userId, Exception e) {
+        // create json response
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("status", "internal_server_error");
+        errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.put("message", "Unknown error");
+
+        // log error
+        createLog.create(userId, e.getMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // create tag
     @PostMapping("/create")
@@ -45,10 +63,13 @@ public class TagController {
 
                 return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
             } else {
+                String message = "Failed to create tag";
+
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                responseBody.put("message", "Failed to create tag");
+                responseBody.put("message", message);
 
+                createLog.create(userId, message);
                 return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (IllegalArgumentException e) {
@@ -58,19 +79,10 @@ public class TagController {
             errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
             errorResponse.put("message", "Duplicate entry");
 
-            System.out.println("Error: " + e.getMessage());
-
+            createLog.create(userId, e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-
-            errorResponse.put("status", "internal_server_error");
-            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Unknown error");
-
-            System.out.println("Error: " + e.getMessage());
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            return exceptionWrapper(userId, e);
         }
     }
 
@@ -107,24 +119,27 @@ public class TagController {
                 responseBody.put("status", "success");
                 responseBody.put("statusCode", HttpStatus.CREATED.value());
                 responseBody.put("message", "All tags created successfully");
+
                 return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
             } else if (successCount > 0) {
                 responseBody.put("status", "partial_success");
                 responseBody.put("statusCode", HttpStatus.MULTI_STATUS.value());
-                responseBody.put("message", "Some tags created successfully");
+                String message = "Some tags created successfully";
+                responseBody.put("message", message);
+
+                createLog.create(userId, message);
                 return new ResponseEntity<>(responseBody, HttpStatus.MULTI_STATUS);
             } else {
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                responseBody.put("message", "Failed to create any tags");
+                String message = "Failed to create any tags";
+                responseBody.put("message", message);
+
+                createLog.create(userId, message);
                 return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "internal_server_error");
-            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Error: " + e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            return exceptionWrapper(userId, e);
         }
     }
 
@@ -139,16 +154,11 @@ public class TagController {
             if (tags != null && !tags.isEmpty()) {
                 return new ResponseEntity<>(tags, HttpStatus.OK);
             } else {
+                createLog.create(userId, "http status: not found");
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-
-            errorResponse.put("status", "internal_server_error");
-            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Error: " + e.getMessage());
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            return exceptionWrapper(userId, e);
         }
     }
 
@@ -161,19 +171,19 @@ public class TagController {
                 responseBody.put("status", "success");
                 responseBody.put("statusCode", HttpStatus.OK.value());
                 responseBody.put("message", "Tag " + (isShow ? "show" : "hidden"));
+
                 return new ResponseEntity<>(responseBody, HttpStatus.OK);
             } else {
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.NOT_FOUND.value());
-                responseBody.put("message", "User or tag not found with id: " + userId + " " + tagId);
+                String message = "User or tag not found with id: " + userId + " " + tagId;
+                responseBody.put("message", message);
+
+                createLog.create(userId, message);
                 return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "internal_server_error");
-            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Error: " + e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            return exceptionWrapper(userId, e);
         }
     }
 
@@ -218,8 +228,10 @@ public class TagController {
             } else {
                 responseBody.put("status", "error");
                 responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-                responseBody.put("message", "Failed to update tag");
+                String message = "Failed to update tag";
+                responseBody.put("message", message);
 
+                createLog.create(userId, message);
                 return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (IllegalArgumentException e) {
@@ -227,17 +239,12 @@ public class TagController {
 
             errorResponse.put("status", "bad_request");
             errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
-            errorResponse.put("message", e.getMessage());
+            errorResponse.put("message", "illegal argument");
 
+            createLog.create(userId, e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-
-            errorResponse.put("status", "internal_server_error");
-            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Error: " + e.getMessage());
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            return exceptionWrapper(userId, e);
         }
     }
 }
