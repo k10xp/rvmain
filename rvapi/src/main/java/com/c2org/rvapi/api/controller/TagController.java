@@ -70,6 +70,60 @@ public class TagController {
         }
     }
 
+    // create batch
+    @PostMapping("/create/batch")
+    public ResponseEntity<Map<String, Object>> createTagBatch(
+            @RequestBody List<TagModel> tags,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = JwtToken.matchUser(token);
+
+        int successCount = 0;
+        int failCount = 0;
+
+        try {
+            for (TagModel tag : tags) {
+                try {
+                    int rows = tagCrud.create(tag, userId, null);
+                    if (rows > 0) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (IllegalArgumentException e) {
+                    failCount++;
+                }
+            }
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("created", successCount);
+            responseBody.put("failed", failCount);
+
+            if (successCount == tags.size()) {
+                responseBody.put("status", "success");
+                responseBody.put("statusCode", HttpStatus.CREATED.value());
+                responseBody.put("message", "All tags created successfully");
+                return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
+            } else if (successCount > 0) {
+                responseBody.put("status", "partial_success");
+                responseBody.put("statusCode", HttpStatus.MULTI_STATUS.value());
+                responseBody.put("message", "Some tags created successfully");
+                return new ResponseEntity<>(responseBody, HttpStatus.MULTI_STATUS);
+            } else {
+                responseBody.put("status", "error");
+                responseBody.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                responseBody.put("message", "Failed to create any tags");
+                return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "internal_server_error");
+            errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.put("message", "Error: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // show all user tags
     @GetMapping("/all")
     public ResponseEntity<?> readTags(@RequestHeader("Authorization") String authorizationHeader) {

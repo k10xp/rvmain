@@ -1,15 +1,35 @@
 @token = 
 @tagId = 
 
-### Create tag
+### Create tag, single
 POST http://localhost:8080/tags/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "tagname": "neovim",
-  "reponame": "neovim/neovim"
+  "tagname": "single1",
+  "reponame": "single1/single1"
 }
+
+### Create tag, batch
+POST http://localhost:8080/tags/create/batch
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+[
+  {
+    "tagname": "batch1",
+    "reponame": "batch1/batch1"
+  },
+  {
+    "tagname": "batch2",
+    "reponame": "batch2/batch2"
+  },
+  {
+    "tagname": "batch3",
+    "reponame": "batch3/batch3"
+  }
+]
 
 ### Toggle tag hide
 PUT http://localhost:8080/tags/{{tagId}}/toggle-hide
