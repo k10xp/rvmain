@@ -56,7 +56,9 @@ public class TagController {
 
             errorResponse.put("status", "bad_request");
             errorResponse.put("statusCode", HttpStatus.BAD_REQUEST.value());
-            errorResponse.put("message", e.getMessage());
+            errorResponse.put("message", "Duplicate entry");
+
+            System.out.println("Error: " + e.getMessage());
 
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -64,7 +66,9 @@ public class TagController {
 
             errorResponse.put("status", "internal_server_error");
             errorResponse.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            errorResponse.put("message", "Error: " + e.getMessage());
+            errorResponse.put("message", "Unknown error");
+
+            System.out.println("Error: " + e.getMessage());
 
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
