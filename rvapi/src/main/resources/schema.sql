@@ -24,3 +24,12 @@ CREATE TABLE
         is_show BOOLEAN,
         PRIMARY KEY (user_id, reponame)
     );
+
+---only log_id is unique
+CREATE TABLE
+    IF NOT EXISTS errorlogs (
+        log_id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        log_created VARCHAR(255),
+        log_content TEXT
+    )

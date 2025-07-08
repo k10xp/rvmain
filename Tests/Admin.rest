@@ -5,3 +5,7 @@ Content-Type: application/json
 ### Read tags
 GET http://localhost:8080/admin/tags/read
 Content-Type: application/json
+
+### Read logs
+GET http://localhost:8080/admin/logs/read
+Content-Type: application/json
