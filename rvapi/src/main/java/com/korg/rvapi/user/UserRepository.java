@@ -5,4 +5,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserTable, String> {
+    // check duplicates
+    boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 }

@@ -1,5 +1,6 @@
 package com.korg.rvapi.user;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import com.korg.rvapi.auth.JwtLogic;
+import com.korg.rvapi.auth.PwHash;
+import com.korg.rvapi.errors.DuplicateUserException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,20 +35,48 @@ public class UserController {
     // create new user
     @PostMapping
     public UserTable createUser(@RequestBody UserCreate user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new DuplicateUserException("Email already exists");
+        }
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new DuplicateUserException("Username already exists");
+        }
+
         UserTable userEntry = new UserTable();
 
         String userId = UUID.randomUUID().toString();
-        String token = jwtLogic.generateToken(userId, user.getEmail());
 
         userEntry.setId(userId);
         userEntry.setName(user.getName());
         userEntry.setEmail(user.getEmail());
         userEntry.setUsername(user.getUsername());
-        userEntry.setHashpw(user.getPassword());
+
+        String pwHash = PwHash.hashPassword(user.getPassword());
+        userEntry.setHashpw(pwHash);
+
+        String token = jwtLogic.generateToken(userId, user.getEmail());
         userEntry.setJwt(token);
+
+        String curTime = Instant.now().toString();
+        userEntry.setCreated(curTime);
+        userEntry.setUpdated(curTime);
 
         return userRepository.save(userEntry);
     }
+
+    // generate token
+    // @PostMapping("/token")
+    // public ResponseEntity<UserTable> getToken(@RequestBody UserCreate user) {
+    //     Optional<UserTable> userOpt = userRepository.findByUsername(user.getUsername());
+    //     if (userOpt.isPresent()) {
+    //         UserTable foundUser = userOpt.get();
+    //         if (foundUser.getPassword().equals(user.getPassword())) {
+    //             return ResponseEntity.ok(foundUser);
+    //         }
+    //     }
+    //     // Return 401 Unauthorized if not matched
+    //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    // }
 
     // update
     @PutMapping("/{id}")
