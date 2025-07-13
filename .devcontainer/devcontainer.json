@@ -18,7 +18,8 @@
 				"gxl.git-graph-3"
 			],
 			"settings": {
-				"code-runner.enableAppInsights": false
+				"code-runner.enableAppInsights": false,
+				"chat.mcp.enabled": false
 			}
 		}
 	}

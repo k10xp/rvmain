@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.korg.rvapi.auth.JwtToken;
+import com.korg.rvapi.auth.JwtLogic;
 import com.korg.rvapi.auth.PwHash;
 
 @RestController
@@ -30,10 +30,10 @@ public class MiscController {
         return response;
     }
 
-    private final JwtToken jwtToken;
+    private final JwtLogic jwtToken;
 
     @Autowired
-    public MiscController(JwtToken jwtToken) {
+    public MiscController(JwtLogic jwtToken) {
         this.jwtToken = jwtToken;
     }
 

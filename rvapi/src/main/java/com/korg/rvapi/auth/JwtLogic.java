@@ -12,11 +12,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 
 @Component
-public class JwtToken {
+public class JwtLogic {
+    // import from env file
     private final Environment env;
 
     @Autowired
-    public JwtToken(Environment env) {
+    public JwtLogic(Environment env) {
         this.env = env;
     }
 

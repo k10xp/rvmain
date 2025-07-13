@@ -1,4 +1,10 @@
-.PHONY: reset_tags build dcu pcu
+.PHONY: fmt test reset_tags build dcu pcu
+
+fmt:
+	mvn prettier:write
+
+test:
+	cd rvapi && mvn test
 
 reset_tags:
 	git tag -l | xargs git tag -d

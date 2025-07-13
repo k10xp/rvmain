@@ -46,6 +46,17 @@ public class UserTable {
         this.email = email;
     }
 
+    @Column(name = "username")
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     @Column(name = "hashed_pw")
     @JsonIgnore // prevent exposing in api responses
     private String hashpw;
@@ -56,5 +67,17 @@ public class UserTable {
 
     public void setHashpw(String pw) {
         this.hashpw = PwHash.hashPassword(pw);
+    }
+
+    @Column(name = "jwt_token")
+    @JsonIgnore
+    private String savedjwt;
+
+    public String getJwt() {
+        return savedjwt;
+    }
+
+    public void setJwt(String jwt) {
+        this.savedjwt = jwt;
     }
 }

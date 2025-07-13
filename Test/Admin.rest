@@ -1,0 +1,5 @@
+@host = http://localhost:8080
+
+### Read all users
+GET {{host}}/admin/users
+Content-Type: application/json

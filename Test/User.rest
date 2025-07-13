@@ -1,8 +1,5 @@
 @host = http://localhost:8080
-
-### Read all users
-GET {{host}}/api/users
-Content-Type: application/json
+@id = 
 
 ### Create user
 POST {{host}}/api/users
@@ -11,10 +8,25 @@ Content-Type: application/json
 {
     "name": "John",
     "email": "john@email.com",
-    "password": "john"
+    "username": "john_username",
+    "password": "john_password"
 }
 
 ### Get single user
-@id = 
 GET {{host}}/api/users/{{id}}
+Content-Type: application/json
+
+### Update existing user
+PUT {{host}}/api/users/{{id}}
+Content-Type: application/json
+
+{
+    "name": "John Update",
+    "email": "john@email.com",
+    "username": "john_username1",
+    "password": "john_password1"
+}
+
+### Delete single user
+DELETE {{host}}/api/users/{{id}}
 Content-Type: application/json
