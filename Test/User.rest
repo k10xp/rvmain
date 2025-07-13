@@ -1,0 +1,14 @@
+@host = http://localhost:8080
+
+###
+GET {{host}}/api/users
+Content-Type: application/json
+
+###
+POST {{host}}/api/users
+Content-Type: application/json
+
+{
+    "name": "John",
+    "email": "john@email.com"
+}

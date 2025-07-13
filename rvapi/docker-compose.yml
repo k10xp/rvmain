@@ -1,0 +1,24 @@
+services:
+  rvapi:
+    container_name: rvapi
+    image: kenf1/rvapi:0.1.0
+    build: .
+    ports:
+      - 8080:8080
+    env_file:
+      - ./env_dir/api.env
+    depends_on:
+      - pgdb
+
+  pgdb:
+    container_name: pgdb
+    image: postgres:17
+    ports:
+      - 5432:5432
+    env_file:
+      - ./env_dir/db.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
