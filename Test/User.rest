@@ -13,3 +13,8 @@ Content-Type: application/json
     "email": "john@email.com",
     "password": "john"
 }
+
+### Get single user
+@id = 
+GET {{host}}/api/users/{{id}}
+Content-Type: application/json

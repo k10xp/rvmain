@@ -1,6 +1,7 @@
 package com.korg.rvapi.user;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,23 +20,31 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserTable> getAllUsers() {
         return userRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable String id) {
+    public UserTable getUserById(@PathVariable String id) {
         return userRepository.findById(id).get();
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
+    public UserTable createUser(@RequestBody UserCreate user) {
+        UserTable userEntry = new UserTable();
+        String userId = UUID.randomUUID().toString();
+
+        userEntry.setId(userId);
+        userEntry.setName(user.getName());
+        userEntry.setEmail(user.getEmail());
+        userEntry.setHashpw(user.getPassword());
+
+        return userRepository.save(userEntry);
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable String id, @RequestBody User user) {
-        User existingUser = userRepository.findById(id).get();
+    public UserTable updateUser(@PathVariable String id, @RequestBody UserTable user) {
+        UserTable existingUser = userRepository.findById(id).get();
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
         return userRepository.save(existingUser);
