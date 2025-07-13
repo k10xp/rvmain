@@ -1,0 +1,14 @@
+@host = http://localhost:8080
+
+### Generate hashed pw
+@pw = pwtohash
+
+POST {{host}}/misc/pw/{{pw}}
+Content-Type: application/json
+
+### Generate jwt
+@userid = 123
+@email = email@email
+
+POST {{host}}/misc/jwt/{{userid}}/{{email}}
+Content-Type: application/json

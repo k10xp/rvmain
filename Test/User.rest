@@ -1,14 +1,15 @@
 @host = http://localhost:8080
 
-###
+### Read all users
 GET {{host}}/api/users
 Content-Type: application/json
 
-###
+### Create user
 POST {{host}}/api/users
 Content-Type: application/json
 
 {
     "name": "John",
-    "email": "john@email.com"
+    "email": "john@email.com",
+    "password": "john"
 }
