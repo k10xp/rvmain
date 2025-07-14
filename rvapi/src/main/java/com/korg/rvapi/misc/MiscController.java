@@ -22,7 +22,7 @@ public class MiscController {
         response.put("Input password", pw);
 
         try {
-            String hash = PwHash.hashPassword(pw);
+            String hash = PwHash.createHashedPassword(pw);
             response.put("Hashed password", hash);
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,7 +46,7 @@ public class MiscController {
         response.put("email", email);
 
         try {
-            String token = jwtToken.generateToken(userId, email);
+            String token = jwtToken.encodeJWT(userId, email);
             response.put("Token", token);
         } catch (Exception e) {
             e.printStackTrace();

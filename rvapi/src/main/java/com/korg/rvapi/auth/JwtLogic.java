@@ -29,8 +29,7 @@ public class JwtLogic {
         return env.getProperty("JWT_ISSUER");
     }
 
-    // encode jwt
-    public String generateToken(String userId, String email) {
+    public String encodeJWT(String userId, String email) {
         String secret = getSecret();
         String issuer = getIssuer();
 
@@ -41,12 +40,11 @@ public class JwtLogic {
                 .withIssuer(issuer)
                 .withClaim("email", email)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3600_000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 1 day
                 .sign(algorithm);
     }
 
-    // decode jwt
-    public String matchUser(String token) {
+    public String decodeJWT(String token) {
         String secret = getSecret();
         String issuer = getIssuer();
 

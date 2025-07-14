@@ -9,7 +9,7 @@ import com.korg.rvapi.user.models.UserTable;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserTable, String> {
-    // check duplicates
+    // check duplicates conditional
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
