@@ -18,6 +18,7 @@ public class MiscController {
     @PostMapping("/pw/{pw}")
     public Map<String, Object> createHashPw(@PathVariable String pw) {
         Map<String, Object> response = new HashMap<>();
+
         response.put("Input password", pw);
 
         try {
@@ -40,6 +41,7 @@ public class MiscController {
     @PostMapping("/jwt/{userId}/{email}")
     public Map<String, Object> createJwt(@PathVariable String userId, @PathVariable String email) {
         Map<String, Object> response = new HashMap<>();
+
         response.put("userId", userId);
         response.put("email", email);
 

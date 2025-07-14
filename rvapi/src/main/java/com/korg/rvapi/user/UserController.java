@@ -1,9 +1,14 @@
 package com.korg.rvapi.user;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +21,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import com.korg.rvapi.auth.JwtLogic;
 import com.korg.rvapi.auth.PwHash;
 import com.korg.rvapi.errors.DuplicateUserException;
+import com.korg.rvapi.user.models.Login;
+import com.korg.rvapi.user.models.UserCreate;
+import com.korg.rvapi.user.models.UserResponse;
+import com.korg.rvapi.user.models.UserTable;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,7 +43,7 @@ public class UserController {
 
     // create new user
     @PostMapping
-    public UserTable createUser(@RequestBody UserCreate user) {
+    public UserResponse createUser(@RequestBody UserCreate user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new DuplicateUserException("Email already exists");
         }
@@ -61,22 +70,32 @@ public class UserController {
         userEntry.setCreated(curTime);
         userEntry.setUpdated(curTime);
 
-        return userRepository.save(userEntry);
+        UserTable savedUser = userRepository.save(userEntry); // save
+        return new UserResponse(savedUser); // return custom
     }
 
     // generate token
-    // @PostMapping("/token")
-    // public ResponseEntity<UserTable> getToken(@RequestBody UserCreate user) {
-    //     Optional<UserTable> userOpt = userRepository.findByUsername(user.getUsername());
-    //     if (userOpt.isPresent()) {
-    //         UserTable foundUser = userOpt.get();
-    //         if (foundUser.getPassword().equals(user.getPassword())) {
-    //             return ResponseEntity.ok(foundUser);
-    //         }
-    //     }
-    //     // Return 401 Unauthorized if not matched
-    //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    // }
+    @PostMapping("/token")
+    public ResponseEntity<Map<String, Object>> getToken(@RequestBody Login user) {
+        Optional<UserTable> userOpt = userRepository.findByUsername(user.getUsername());
+        Map<String, Object> response = new HashMap<>();
+
+        if (userOpt.isPresent()) {
+            UserTable foundUser = userOpt.get();
+            if (PwHash.verifyPassword(user.getPassword(), foundUser.getHashpw())) {
+                String token = jwtLogic.generateToken(foundUser.getId(), foundUser.getEmail());
+
+                foundUser.setJwt(token);
+                userRepository.save(foundUser);
+
+                response.put("jwt token", token);
+                return ResponseEntity.ok(response); // 200
+            }
+        }
+
+        response.put("error", "Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); // 401
+    }
 
     // update
     @PutMapping("/{id}")

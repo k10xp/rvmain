@@ -1,4 +1,4 @@
-package com.korg.rvapi.user;
+package com.korg.rvapi.user.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

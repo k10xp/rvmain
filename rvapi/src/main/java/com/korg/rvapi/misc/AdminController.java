@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.korg.rvapi.user.UserRepository;
-import com.korg.rvapi.user.UserTable;
+import com.korg.rvapi.user.models.UserTable;
 
 //todo: remove
 @RestController

@@ -12,6 +12,15 @@ Content-Type: application/json
     "password": "john_password"
 }
 
+### Get token
+POST {{host}}/api/users/token
+Content-Type: application/json
+
+{
+    "username": "john_username",
+    "password": "john_password"
+}
+
 ### Get single user
 GET {{host}}/api/users/{{id}}
 Content-Type: application/json
