@@ -2,23 +2,25 @@
 	"name": "Existing Dockerfile",
 	"build": {
 		"context": "..",
-		"dockerfile": "../DevDockerfile"
+		"dockerfile": "../Dev.dockerfile"
 	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"formulahendry.code-runner",
-                "redhat.java",
-                "vscjava.vscode-maven",
-                "vscjava.vscode-java-debug",
-                "vscjava.vscode-java-test",
+				"redhat.java",
+				"vscjava.vscode-maven",
+				"vscjava.vscode-java-debug",
+				"vscjava.vscode-java-test",
 				"vscjava.vscode-gradle",
 				"vscjava.vscode-java-dependency",
 				"vscjava.vscode-spring-initializr",
-				"gxl.git-graph-3"
+				"gxl.git-graph-3",
+				"humao.rest-client"
 			],
 			"settings": {
 				"code-runner.enableAppInsights": false,
+				"rest-client.enableTelemetry": false,
 				"chat.mcp.enabled": false
 			}
 		}

@@ -18,10 +18,11 @@ public class MiscController {
     @PostMapping("/pw/{pw}")
     public Map<String, Object> createHashPw(@PathVariable String pw) {
         Map<String, Object> response = new HashMap<>();
+
         response.put("Input password", pw);
 
         try {
-            String hash = PwHash.hashPassword(pw);
+            String hash = PwHash.createHashedPassword(pw);
             response.put("Hashed password", hash);
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,11 +41,12 @@ public class MiscController {
     @PostMapping("/jwt/{userId}/{email}")
     public Map<String, Object> createJwt(@PathVariable String userId, @PathVariable String email) {
         Map<String, Object> response = new HashMap<>();
+
         response.put("userId", userId);
         response.put("email", email);
 
         try {
-            String token = jwtToken.generateToken(userId, email);
+            String token = jwtToken.encodeJWT(userId, email);
             response.put("Token", token);
         } catch (Exception e) {
             e.printStackTrace();

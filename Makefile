@@ -1,7 +1,7 @@
 .PHONY: fmt test reset_tags build dcu pcu
 
 fmt:
-	mvn prettier:write
+	cd rvapi && mvn prettier:write
 
 test:
 	cd rvapi && mvn test

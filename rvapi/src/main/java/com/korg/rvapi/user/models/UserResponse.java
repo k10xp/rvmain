@@ -1,10 +1,18 @@
-package com.korg.rvapi.user;
+package com.korg.rvapi.user.models;
 
-public class UserCreate {
+public class UserResponse {
     private String name;
     private String email;
     private String username;
-    private String password;
+
+    public UserResponse() {
+    }
+
+    public UserResponse(UserTable user) {
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.username = user.getUsername();
+    }
 
     public String getName() {
         return name;
@@ -28,13 +36,5 @@ public class UserCreate {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

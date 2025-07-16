@@ -13,27 +13,22 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 
 @Component
 public class JwtLogic {
-    // import from env file
-    private final Environment env;
+    private final String secret;
+    private final String issuer;
 
+    // constructor overloading: deploy & test
     @Autowired
     public JwtLogic(Environment env) {
-        this.env = env;
+        this.secret = env.getProperty("JWT_SECRET");
+        this.issuer = env.getProperty("JWT_ISSUER");
     }
 
-    private String getSecret() {
-        return env.getProperty("JWT_SECRET");
+    public JwtLogic(String secret, String issuer) {
+        this.secret = secret;
+        this.issuer = issuer;
     }
 
-    private String getIssuer() {
-        return env.getProperty("JWT_ISSUER");
-    }
-
-    // encode jwt
-    public String generateToken(String userId, String email) {
-        String secret = getSecret();
-        String issuer = getIssuer();
-
+    public String encodeJWT(String userId, String email) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         return JWT.create()
@@ -41,15 +36,11 @@ public class JwtLogic {
                 .withIssuer(issuer)
                 .withClaim("email", email)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3600_000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 1 day
                 .sign(algorithm);
     }
 
-    // decode jwt
-    public String matchUser(String token) {
-        String secret = getSecret();
-        String issuer = getIssuer();
-
+    public String decodeJWT(String token) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         JWTVerifier verifier = JWT.require(algorithm)

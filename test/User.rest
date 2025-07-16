@@ -1,7 +1,7 @@
 @host = http://localhost:8080
-@id = 
+@token = 
 
-### Create user
+### Create
 POST {{host}}/api/users
 Content-Type: application/json
 
@@ -12,13 +12,24 @@ Content-Type: application/json
     "password": "john_password"
 }
 
-### Get single user
-GET {{host}}/api/users/{{id}}
+### Get token
+POST {{host}}/api/users/token
 Content-Type: application/json
 
-### Update existing user
-PUT {{host}}/api/users/{{id}}
+{
+    "username": "john_username",
+    "password": "john_password"
+}
+
+### Read
+GET {{host}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Update
+PUT {{host}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
     "name": "John Update",
@@ -27,6 +38,7 @@ Content-Type: application/json
     "password": "john_password1"
 }
 
-### Delete single user
-DELETE {{host}}/api/users/{{id}}
+### Delete
+DELETE {{host}}/api/users
 Content-Type: application/json
+Authorization: Bearer {{token}}

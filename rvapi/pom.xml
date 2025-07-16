@@ -12,7 +12,7 @@
 	<artifactId>rvapi</artifactId>
 	<version>0.1.0</version>
 	<name>rvapi</name>
-	<description>Service-1 REST API</description>
+	<description>rvapi</description>
 	<url/>
 	<licenses>
 		<license/>

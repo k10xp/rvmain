@@ -1,12 +1,10 @@
-package com.korg.rvapi.user;
+package com.korg.rvapi.user.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import com.korg.rvapi.auth.PwHash;
 
 //sql crud
 @Entity
@@ -66,7 +64,7 @@ public class UserTable {
     }
 
     public void setHashpw(String pw) {
-        this.hashpw = PwHash.hashPassword(pw);
+        this.hashpw = pw;
     }
 
     @Column(name = "jwt_token")
@@ -79,5 +77,27 @@ public class UserTable {
 
     public void setJwt(String jwt) {
         this.savedjwt = jwt;
+    }
+
+    @Column(name = "time_created")
+    private String created;
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    @Column(name = "time_updated")
+    private String updated;
+
+    public String getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(String updated) {
+        this.updated = updated;
     }
 }
