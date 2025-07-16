@@ -13,26 +13,22 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 
 @Component
 public class JwtLogic {
-    // import from env file
-    private final Environment env;
+    private final String secret;
+    private final String issuer;
 
+    // constructor overloading: deploy & test
     @Autowired
     public JwtLogic(Environment env) {
-        this.env = env;
+        this.secret = env.getProperty("JWT_SECRET");
+        this.issuer = env.getProperty("JWT_ISSUER");
     }
 
-    private String getSecret() {
-        return env.getProperty("JWT_SECRET");
-    }
-
-    private String getIssuer() {
-        return env.getProperty("JWT_ISSUER");
+    public JwtLogic(String secret, String issuer) {
+        this.secret = secret;
+        this.issuer = issuer;
     }
 
     public String encodeJWT(String userId, String email) {
-        String secret = getSecret();
-        String issuer = getIssuer();
-
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         return JWT.create()
@@ -45,9 +41,6 @@ public class JwtLogic {
     }
 
     public String decodeJWT(String token) {
-        String secret = getSecret();
-        String issuer = getIssuer();
-
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         JWTVerifier verifier = JWT.require(algorithm)
