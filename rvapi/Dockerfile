@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine-3.21 AS builder
+FROM eclipse-temurin:24-jdk-alpine-3.21 AS builder
 WORKDIR /app
 
 COPY ./mvnw ./pom.xml ./
@@ -8,7 +8,7 @@ RUN ./mvnw dependency:go-offline -B
 COPY ./src ./src
 RUN ./mvnw clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine-3.21
+FROM eclipse-temurin:24-jre-alpine-3.21
 WORKDIR /app
 
 RUN apk update
