@@ -1,4 +1,6 @@
-.PHONY: fmt test reset_tags build dcu pcu
+.PHONY: fmt test reset_tags build \
+	dcu dcw \
+	pcu pcw
 
 fmt:
 	cd rvapi && mvn prettier:write
@@ -17,3 +19,9 @@ dcu:
 
 pcu:
 	cd rvapi && podman compose up --build
+
+dcw:
+	cd rvapi && docker compose watch
+
+pcw:
+	cd rvapi && podman compose watch

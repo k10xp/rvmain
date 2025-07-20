@@ -3,6 +3,16 @@ services:
     container_name: rvapi
     image: kenf1/rvapi:0.1.0
     build: .
+    develop:
+      watch:
+        - action: sync
+          path: ./pom.xml
+          ignore:
+            - target/
+        - action: rebuild
+          path: ./src
+        - action: rebuild
+          path: ./env_dir
     ports:
       - 8080:8080
     env_file:
