@@ -20,7 +20,8 @@
 			],
 			"settings": {
 				"code-runner.enableAppInsights": false,
-				"rest-client.enableTelemetry": false,
+				"telemetry.editStats.enabled": false,
+				"telemetry.feedback.enabled": false,
 				"chat.mcp.enabled": false
 			}
 		}
