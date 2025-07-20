@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - rvapi/src/main/java/com/korg/rvapi/auth/**
-      - src/test/java/com/korg/rvapi/**
+      - rvapi/src/test/java/com/korg/rvapi/**
 
 jobs:
   build:
