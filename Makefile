@@ -14,25 +14,25 @@ endef
 # 	cdr && mvn prettier:write
 
 test:
-	cdr && mvn test
+	$(call cdr) && mvn test
 
 build:
-	cdr && ./mvnw clean install
+	$(call cdr) && ./mvnw clean install
 
 # dcu:
-# 	cdr && docker compose up --build
+# 	$(call cdr) && docker compose up --build
 
 # pcu:
-# 	cdr && podman compose up --build
+# 	$(call cdr) && podman compose up --build
 
 dcw:
-	cdr && $(call cw,docker)
+	$(call cdr) && $(call cw,docker)
 
 pcw:
-	cdr && $(call cw,podman)
+	$(call cdr) && $(call cw,podman)
 
 reset_tags:
 	git tag -l | xargs git tag -d
 
 clean:
-	cdr && rm -rf target
+	$(call cdr) && rm -rf target

@@ -1,5 +1,5 @@
 services:
-  rvapi:
+  rvapi-cluster:
     container_name: rvapi
     image: kenf1/rvapi:0.1.0
     build: .
@@ -7,12 +7,14 @@ services:
       watch:
         - action: sync
           path: ./pom.xml
+          target: /app/pom.xml
           ignore:
             - target/
         - action: rebuild
           path: ./src
-        - action: rebuild
-          path: ./env_dir
+          target: /app/src
+        # - action: rebuild
+        #   path: ./env_dir
     ports:
       - 8080:8080
     env_file:
