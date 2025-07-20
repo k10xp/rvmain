@@ -1,27 +1,38 @@
-.PHONY: fmt test reset_tags build \
-	dcu dcw \
-	pcu pcw
+.PHONY: fmt test reset_tags build clean \
+	dcu dcw pcu pcw
 
-fmt:
-	cd rvapi && mvn prettier:write
+define cdr
+	cd rvapi
+endef
+
+#replace with docker or podman
+define cw
+	$1 compose watch
+endef
+
+# fmt:
+# 	cdr && mvn prettier:write
 
 test:
-	cd rvapi && mvn test
+	cdr && mvn test
+
+build:
+	cdr && ./mvnw clean install
+
+# dcu:
+# 	cdr && docker compose up --build
+
+# pcu:
+# 	cdr && podman compose up --build
+
+dcw:
+	cdr && $(call cw,docker)
+
+pcw:
+	cdr && $(call cw,podman)
 
 reset_tags:
 	git tag -l | xargs git tag -d
 
-build:
-	cd rvapi && ./mvnw clean install
-
-dcu:
-	cd rvapi && docker compose up --build
-
-pcu:
-	cd rvapi && podman compose up --build
-
-dcw:
-	cd rvapi && docker compose watch
-
-pcw:
-	cd rvapi && podman compose watch
+clean:
+	cdr && rm -rf target
